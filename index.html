@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Threat Explorer</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: black;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .scene {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .scene.active {
+            opacity: 1;
+        }
+
+        h1, h2 {
+            font-size: 3em;
+            text-transform: uppercase;
+            transition: transform 1s ease-in-out;
+        }
+
+        h1:hover, h2:hover {
+            transform: scale(1.1);
+        }
+
+        #data-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+    <div id="intro" class="scene active">
+        <h1>Cyber Threat Explorer</h1>
+        <p>Navigate the web’s most dangerous zones.</p>
+    </div>
+
+    <div id="data-container" class="scene">
+        <canvas id="dataCanvas"></canvas>
+    </div>
+
+    <div id="reveal" class="scene">
+        <h2>Hidden Threats</h2>
+        <p>What dangers lurk beneath the surface?</p>
+    </div>
+
+    <script>
+        // Particle Effect for Threat Visualization
+        const canvas = document.getElementById("dataCanvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+
+        class Particle {
+            constructor(x, y, size, color) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function createParticles() {
+            for (let i = 0; i < 100; i++) {
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                let size = Math.random() * 5 + 2;
+                let color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                particles.push(new Particle(x, y, size, color));
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => p.draw());
+            requestAnimationFrame(animateParticles);
+        }
+
+        createParticles();
+        animateParticles();
+
+        // Scroll-triggered cinematic reveals
+        document.addEventListener("scroll", () => {
+            const scenes = document.querySelectorAll(".scene");
+            scenes.forEach(scene => {
+                let rect = scene.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    scene.classList.add("active");
+                }
+            });
+        });
+
+        // Adaptive Sound Effects
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+
+        oscillator.type = "sine";
+        oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // Initial tone
+        oscillator.connect(audioCtx.destination);
+        oscillator.start();
+
+        document.addEventListener("mousemove", (event) => {
+            let frequency = event.clientX / window.innerWidth * 1000;
+            oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+        });
+    </script>
+</body>
+</html>
