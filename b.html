@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Threat Interactive Explorer</title>
+    <style>
+        :root {
+            --primary: #2a2a72;
+            --secondary: #009ffd;
+            --danger: #ff3c38;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui;
+            line-height: 1.6;
+            background: linear-gradient(45deg, #f3f9ff, #ffffff);
+        }
+
+        #app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .threat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .threat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .threat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--danger);
+        }
+
+        .simulation-canvas {
+            width: 100%;
+            height: 400px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            margin: 2rem 0;
+        }
+
+        .malware-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--danger);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        .active-threat {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>🛡️ Cyber Threat Interactive Explorer</h1>
+            <nav class="threat-nav">
+                <button data-section="phishing">Phishing Simulator</button>
+                <button data-section="malware">Malware Spread</button>
+                <button data-section="privacy">Privacy Paradox</button>
+            </nav>
+        </header>
+
+        <div class="simulation-canvas" id="malwareViz"></div>
+
+        <div class="threat-grid">
+            <article class="threat-card" data-threat="phishing">
+                <h2>Phishing Attack Simulator</h2>
+                <p>Identify malicious emails in real-time...</p>
+                <div class="simulation-ui">
+                    <div class="email-inbox"></div>
+                    <div class="score-display"></div>
+                </div>
+            </article>
+
+            <article class="threat-card" data-threat="malware">
+                <h2>Malware Spread Visualizer</h2>
+                <p>Watch how malware propagates...</p>
+                <div class="infection-rate"></div>
+            </article>
+        </div>
+
+        <footer>
+            <div id="dynamicTips"></div>
+        </footer>
+    </div>
+
+    <script>
+        // Malware visualization
+        const canvas = document.createElement('div');
+        let particles = [];
+        
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'malware-particle';
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.top = `${Math.random() * 100}%`;
+            canvas.appendChild(particle);
+            particles.push({
+                element: particle,
+                x: parseFloat(particle.style.left),
+                y: parseFloat(particle.style.top),
+                dx: (Math.random() - 0.5) * 2,
+                dy: (Math.random() - 0.5) * 2
+            });
+        }
+
+        function animate() {
+            particles.forEach(p => {
+                p.x += p.dx;
+                p.y += p.dy;
+                
+                if(p.x < 0 || p.x > 95) p.dx *= -1;
+                if(p.y < 0 || p.y > 95) p.dy *= -1;
+                
+                p.element.style.left = `${p.x}%`;
+                p.element.style.top = `${p.y}%`;
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize visualization
+        document.getElementById('malwareViz').appendChild(canvas);
+        for(let i = 0; i < 50; i++) createParticle();
+        animate();
+
+        // Interactive sections
+        document.querySelectorAll('.threat-nav button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const section = document.querySelector(`[data-threat="${btn.dataset.section}"]`);
+                section.classList.add('active-threat');
+                setTimeout(() => section.classList.remove('active-threat'), 2000);
+                section.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Dynamic tips
+        const tips = [
+            "💡 76% of cyber attacks start with phishing emails",
+            "🔒 Always verify sender addresses before clicking links",
+            "⏱️ Average malware infection occurs within 42 seconds"
+        ];
+        
+        let tipIndex = 0;
+        setInterval(() => {
+            document.getElementById('dynamicTips').textContent = tips[tipIndex];
+            tipIndex = (tipIndex + 1) % tips.length;
+        }, 5000);
+    </script>
+</body>
+</html>
