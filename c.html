@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dark Web Detective</title>
+  <style>
+    /* Reset & Basic Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background-color: #1a1a1a;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 50px 20px;
+      background: linear-gradient(45deg, #2c3e50, #34495e);
+    }
+
+    header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      opacity: 0.8;
+    }
+
+    /* Map Section */
+    #map {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      margin: 50px auto;
+      overflow: hidden;
+    }
+
+    .map-container {
+      position: relative;
+    }
+
+    .map-container img {
+      width: 100%;
+      transform: translateY(-10%);
+      transition: transform 0.5s ease;
+    }
+
+    .map-container:hover img {
+      transform: translateY(0);
+    }
+
+    .danger-zone {
+      position: absolute;
+      padding: 10px;
+      background: rgba(255, 0, 0, 0.7);
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+      font-size: 0.9rem;
+    }
+
+    .danger-zone:hover {
+      transform: scale(1.1);
+    }
+
+    /* Progress Tracker */
+    #progress {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px;
+      border-radius: 10px;
+      width: 200px;
+    }
+
+    #progress h2 {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    #badges {
+      list-style: none;
+    }
+
+    #badges li {
+      margin: 5px 0;
+      padding: 5px;
+      background: #3498db;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #fff;
+      color: #000;
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* Danger Zone Positions */
+    [data-zone="phishing"] {
+      top: 30%;
+      left: 20%;
+    }
+
+    [data-zone="malware"] {
+      top: 50%;
+      left: 50%;
+    }
+
+    [data-zone="dark-web"] {
+      top: 70%;
+      left: 70%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Section -->
+  <header>
+    <h1>Dark Web Detective</h1>
+    <p>Uncover the dangers of the web and learn how to stay safe.</p>
+  </header>
+
+  <!-- Interactive Map Section -->
+  <section id="map">
+    <div class="map-container">
+      <img src="https://via.placeholder.com/1200x600" alt="Interactive Map of the Internet">
+      <div class="danger-zone" data-zone="phishing">Phishing Zone</div>
+      <div class="danger-zone" data-zone="malware">Malware Zone</div>
+      <div class="danger-zone" data-zone="dark-web">Dark Web Zone</div>
+    </div>
+  </section>
+
+  <!-- Progress Tracker -->
+  <aside id="progress">
+    <h2>Your Progress</h2>
+    <ul id="badges"></ul>
+  </aside>
+
+  <!-- Modal for Micro-Experiences -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2 id="modal-title"></h2>
+      <p id="modal-description"></p>
+      <div id="modal-interactive"></div>
+    </div>
+  </div>
+
+  <script>
+    // Modal Interaction
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modal-title");
+    const modalDescription = document.getElementById("modal-description");
+    const modalInteractive = document.getElementById("modal-interactive");
+    const closeModal = document.querySelector(".close");
+
+    document.querySelectorAll(".danger-zone").forEach(zone => {
+      zone.addEventListener("click", () => {
+        modalTitle.textContent = `${zone.dataset.zone} Zone`;
+        modalDescription.textContent = `Learn how to avoid ${zone.dataset.zone} threats.`;
+        modalInteractive.innerHTML = `<button onclick="awardBadge('${zone.dataset.zone}')">Complete Challenge</button>`;
+        modal.style.display = "flex";
+      });
+    });
+
+    closeModal.addEventListener("click", () => {
+      modal.style.display = "none";
+    });
+
+    // Badge System
+    function awardBadge(zone) {
+      const badges = document.getElementById("badges");
+      const badge = document.createElement("li");
+      badge.textContent = `${zone} Badge Unlocked!`;
+      badges.appendChild(badge);
+      modal.style.display = "none";
+    }
+  </script>
+</body>
+</html>
