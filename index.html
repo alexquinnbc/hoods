@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Web Expedition: Navigate the Shadows</title>
+    <style>
+        :root {
+            --danger-color: #ff4444;
+            --safe-color: #44ff44;
+            --tile-size: 80px;
+            --modal-bg: rgba(34, 34, 34, 0.95);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        #map-container {
+            display: grid;
+            grid-template-columns: repeat(10, var(--tile-size));
+            transform: rotateX(45deg) rotateZ(45deg);
+            transition: transform 0.3s ease;
+            position: relative;
+            width: calc(var(--tile-size) * 10);
+            max-width: 90vw;
+            cursor: move;
+        }
+
+        .map-tile {
+            width: var(--tile-size);
+            height: var(--tile-size);
+            background: #333;
+            border: 1px solid #555;
+            transition: transform 0.3s ease, background 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-tile:hover {
+            transform: scale(1.2);
+            background: var(--danger-color);
+        }
+
+        .map-tile svg {
+            width: 100%;
+            height: 100%;
+            fill: #fff;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .map-tile:hover svg {
+            opacity: 1;
+        }
+
+        #modal {
+            display: none;
+            position: fixed;
+            top: 15%;
+            left: 10%;
+            width: 80%;
+            max-width: 600px;
+            background: var(--modal-bg);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px var(--danger-color);
+            animation: popIn 0.5s ease;
+            z-index: 1000;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        #modal h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+            color: var(--danger-color);
+        }
+
+        #modal p {
+            font-size: 1em;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .modal-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .modal-options button {
+            padding: 10px;
+            background: #555;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .modal-options button:hover {
+            background: var(--danger-color);
+        }
+
+        #threat-meter {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(to right, var(--safe-color) 0%, var(--danger-color));
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #threat-meter-fill {
+            height: 100%;
+            background: var(--safe-color);
+            transition: width 0.5s ease;
+        }
+
+        #badge-counter {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            font-size: 1.2em;
+            background: #222;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #instructions {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --tile-size: 50px;
+            }
+
+            #modal {
+                top: 10%;
+                left: 5%;
+                width: 90%;
+            }
+
+            #threat-meter {
+                width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="badge-counter">Badges: 0</div>
+    <div id="threat-meter"><div id="threat-meter-fill"></div></div>
+    <div id="map-container"></div>
+    <div id="modal">
+        <h2>Threat Encounter</h2>
+        <p id="modal-content"></p>
+        <div class="modal-options" id="modal-options"></div>
+    </div>
+    <div id="instructions">Use arrow keys or drag to navigate, click tiles to explore threats!</div>
+
+    <script>
+        // Threat data from PCWorld article
+        const threats = {
+            phishing: {
+                description: "Phishing emails trick you into sharing sensitive info. Look for misspellings, urgent tones, or suspicious links (PCWorld, 2012).",
+                question: "You receive an email claiming your bank account is locked. It asks for your password. What do you do?",
+                options: [
+                    { text: "Enter your password", correct: false, feedback: "Never share your password! Verify the email's source first." },
+                    { text: "Ignore and delete", correct: true, feedback: "Correct! Deleting suspicious emails is the safest choice." },
+                    { text: "Click the link to check", correct: false, feedback: "Clicking unknown links can lead to malware or scams." }
+                ],
+                svg: `<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>`
+            },
+            malware: {
+                description: "Malicious downloads can infect your device with viruses or spyware. Always verify the source before downloading (PCWorld, 2012).",
+                question: "A pop-up offers a free antivirus download. What should you do?",
+                options: [
+                    { text: "Download it immediately", correct: false, feedback: "Fake antivirus software is a common malware trap!" },
+                    { text: "Check the website's legitimacy", correct: true, feedback: "Great! Always verify the source before downloading." },
+                    { text: "Close the pop-up", correct: true, feedback: "Correct! Closing unknown pop-ups is a safe choice." }
+                ],
+                svg: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>`
+            },
+            wifi: {
+                description: "Unsecured Wi-Fi can expose your data to hackers. Use a VPN on public networks to stay safe (PCWorld, 2012).",
+                question: "You're at a café with free Wi-Fi. How do you protect your data?",
+                options: [
+                    { text: "Connect without a VPN", correct: false, feedback: "Unsecured Wi-Fi is risky without protection!" },
+                    { text: "Use a VPN", correct: true, feedback: "Correct! A VPN encrypts your data, keeping it safe." },
+                    { text: "Avoid online banking", correct: true, feedback: "Good choice! Sensitive tasks are safer on secure networks." }
+                ],
+                svg: `<svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 4.37 3.55 1.65 6.27L0 4.62 1.41 3.21C4.62 0.99 8.66 0 12 0c3.34 0 7.38.99 10.59 3.21L24 4.62l-1.65 1.65C19.63 3.55 15.87 2 12 2zm0 4c-2.21 0-4.45.74-6.36 2.64L4 6.99 5.41 5.58C7.96 3.74 10.48 3 12 3s4.04.74 6.59 2.58L20 6.99l-1.64 1.64C16.45 6.74 14.21 6 12 6zm6 6c0-3.31-2.69-6-6-6s-6 2.69-6 6c0 2.22 1.21 4.15 3 5.19l1.41-1.41C8.79 18.34 8 16.77 8 15c0-2.21 1.79-4 4-4s4 1.79 4 4c0 1.77-.79 3.34-2 4.19l1.41 1.41c1.79-1.04 3-2.97 3-5.19z"/></svg>`
+            }
+        };
+
+        // Initialize game state
+        let badges = 0;
+        let threatLevel = 0;
+        let mapX = 0;
+        let mapY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        // Create map tiles
+        const mapContainer = document.getElementById('map-container');
+        const threatKeys = Object.keys(threats);
+        for (let i = 0; i < 100; i++) {
+            const tile = document.createElement('div');
+            tile.className = 'map-tile';
+            tile.dataset.threat = threatKeys[Math.floor(Math.random() * threatKeys.length)];
+            tile.innerHTML = threats[tile.dataset.threat].svg;
+            tile.addEventListener('click', showModal);
+            mapContainer.appendChild(tile);
+        }
+
+        // Modal handling
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalOptions = document.getElementById('modal-options');
+
+        function showModal(e) {
+            const threat = threats[e.target.closest('.map-tile').dataset.threat];
+            modalContent.textContent = `${threat.description}\n\n${threat.question}`;
+            modalOptions.innerHTML = '';
+            threat.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.addEventListener('click', () => handleAnswer(option, e.target.closest('.map-tile')));
+                modalOptions.appendChild(button);
+            });
+            modal.style.display = 'block';
+            playSound(440, 0.1);
+        }
+
+        function handleAnswer(option, tile) {
+            modalContent.textContent += `\n\n${option.feedback}`;
+            modalOptions.innerHTML = '<button onclick="closeModal()">Close</button>';
+            if (option.correct) {
+                badges++;
+                threatLevel = Math.max(0, threatLevel - 20);
+                tile.style.background = 'var(--safe-color)';
+                tile.style.pointerEvents = 'none';
+                document.getElementById('badge-counter').textContent = `Badges: ${badges}`;
+                playSound(880, 0.2);
+            } else {
+                threatLevel = Math.min(100, threatLevel + 20);
+                playSound(220, 0.2);
+            }
+            updateThreatMeter();
+        }
+
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
+        // Threat meter
+        function updateThreatMeter() {
+            document.getElementById('threat-meter-fill').style.width = `${100 - threatLevel}%`;
+        }
+
+        // Audio
+        const audioCtx = new AudioContext();
+        function playSound(freq, duration) {
+            const oscillator = audioCtx.createOscillator();
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            oscillator.connect(audioCtx.destination);
+            oscillator.start();
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        // Map navigation
+        document.addEventListener('keydown', (e) => {
+            if (modal.style.display === 'block') return;
+            if (e.key === 'ArrowRight') mapX -= 20;
+            if (e.key === 'ArrowLeft') mapX += 20;
+            if (e.key === 'ArrowUp') mapY += 20;
+            if (e.key === 'ArrowDown') mapY -= 20;
+            updateMapPosition();
+            playSound(330, 0.05);
+        });
+
+        mapContainer.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX - mapX;
+            startY = e.clientY - mapY;
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            mapX = e.clientX - startX;
+            mapY = e.clientY - startY;
+            updateMapPosition();
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        mapContainer.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            startX = e.touches[0].clientX - mapX;
+            startY = e.touches[0].clientY - mapY;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            mapX = e.touches[0].clientX - startX;
+            mapY = e.touches[0].clientY - startY;
+            updateMapPosition();
+        });
+
+        document.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+
+        function updateMapPosition() {
+            mapContainer.style.transform = `rotateX(45deg) rotateZ(45deg) translate(${mapX}px, ${mapY}px)`;
+        }
+
+        // Share badges
+        document.getElementById('badge-counter').addEventListener('click', () => {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Dark Web Expedition',
+                    text: `I earned ${badges} safety badges in Dark Web Expedition!`,
+                    url: window.location.href
+                }).catch(() => alert('Sharing not supported on this device.'));
+            } else {
+                alert(`Share your score: I earned ${badges} badges!`);
+            }
+        });
+
+        // Intersection Observer for tile animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'pulse 1s infinite';
+                } else {
+                    entry.target.style.animation = 'none';
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('.map-tile').forEach(tile => observer.observe(tile));
+
+        // CSS for pulse animation
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            @keyframes pulse {
+                0% { transform: scale(1); }
+                50% { transform: scale(1.1); }
+                100% { transform: scale(1); }
+            }
+        `;
+        document.head.appendChild(styleSheet);
+    </script>
+</body>
+</html>
