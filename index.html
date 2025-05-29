@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Abyss Explorer - Unmasking Online Dangers</title>
+    <style>
+        :root {
+            --bg-color: #0a0f18;
+            --text-color: #e0e0e0;
+            --accent-color-primary: #00ffff; /* Cyan */
+            --accent-color-secondary: #ff00ff; /* Magenta */
+            --danger-color: #ff4136;
+            --safe-color: #2ecc40;
+            --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-code: 'Consolas', 'Courier New', monospace;
+            
+            --zone-surface-bg: linear-gradient(180deg, #1a2942 0%, #121c30 100%);
+            --zone-phishing-bg: linear-gradient(180deg, #102a30 0%, #081418 100%);
+            --zone-malware-bg: linear-gradient(180deg, #2b101e 0%, #12080c 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--zone-surface-bg);
+            border-bottom: 2px solid var(--accent-color-primary);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--accent-color-primary);
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px var(--accent-color-primary);
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: #b0c4de;
+        }
+
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            background-color: rgba(10, 15, 24, 0.85); /* Semi-transparent var(--bg-color) */
+            backdrop-filter: blur(10px);
+            padding: 10px 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--accent-color-secondary);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .sticky-nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+
+        .sticky-nav li a {
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .sticky-nav li a:hover, .sticky-nav li a.active {
+            background-color: var(--accent-color-primary);
+            color: var(--bg-color);
+            text-shadow: none;
+        }
+
+        .zone {
+            min-height: 100vh; /* Make each zone roughly screen height */
+            padding: 60px 20px;
+            border-bottom: 1px dashed #444;
+            opacity: 0; /* Initially hidden for Intersection Observer */
+            transform: translateY(50px); /* Initial offset for animation */
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .zone.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .zone h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        .zone h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent-color-secondary);
+        }
+        
+        .zone-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            align-items: start;
+        }
+
+        .info-card {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .info-card h3 {
+            color: var(--accent-color-primary);
+            margin-bottom: 10px;
+        }
+        .info-card ul {
+            list-style-position: inside;
+        }
+        .info-card li {
+            margin-bottom: 8px;
+        }
+
+        /* Specific Zone Styles */
+        #zone-surface { background: var(--zone-surface-bg); }
+        #zone-phishing { background: var(--zone-phishing-bg); }
+        #zone-malware  { background: var(--zone-malware-bg); }
+        /* Add more as needed */
+        #zone-safe-harbor { border-bottom: none; }
+
+
+        /* Phishing Email Interactive Demo */
+        .phishing-email-demo {
+            background-color: #f0f8ff; /* Light alice blue, like an email client */
+            color: #333;
+            padding: 20px;
+            border-radius: 5px;
+            font-family: Arial, sans-serif;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .phishing-email-demo header {
+            background: #e9ecef;
+            padding: 10px;
+            margin: -20px -20px 15px -20px;
+            border-bottom: 1px solid #ccc;
+        }
+        .phishing-email-demo p { color: #333; font-size: 0.95rem; margin-bottom: 10px; }
+        .phishing-email-demo strong { color: #000; }
+        .phishing-email-demo .suspicious {
+            background-color: yellow;
+            cursor: pointer;
+            border-bottom: 1px dashed var(--danger-color);
+            position: relative;
+        }
+        .phishing-email-demo .suspicious:hover::after {
+            content: attr(data-clue);
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background-color: var(--danger-color);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .phishing-email-demo a.suspicious-link {
+            color: #0066cc;
+            text-decoration: underline;
+        }
+         .phishing-email-demo a.suspicious-link:hover::after {
+            content: "Hover shows fake URL: " attr(data-real-url) " but links to: " attr(href) !important;
+        }
+        .phishing-button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white !important; /* Override parent p color */
+            padding: 10px 15px;
+            text-decoration: none;
+            border-radius: 3px;
+            font-weight: bold;
+            border: none;
+        }
+        .phishing-button.suspicious:hover::after {
+             content: "Urgent call to action to a malicious link!" !important;
+        }
+
+        /* Malware Visualizer Placeholder */
+        .malware-visualizer {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border: 2px solid var(--accent-color-secondary);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--accent-color-secondary);
+            font-family: var(--font-code);
+            position: relative;
+            overflow: hidden;
+        }
+        /* Simple "virus scan" animation */
+        .scan-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-color-primary);
+            box-shadow: 0 0 10px var(--accent-color-primary);
+            animation: scan 4s linear infinite;
+        }
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: calc(100% - 3px); }
+            100% { top: 0; }
+        }
+        .malware-visualizer p {
+            z-index: 1; /* Above scan line */
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 20px;
+            background-color: #080c14;
+            border-top: 1px solid var(--accent-color-secondary);
+            font-size: 0.9rem;
+        }
+        footer a {
+            color: var(--accent-color-primary);
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Utility: Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* Transitions for interactive elements */
+        .feedback-popup {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--safe-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            z-index: 2000;
+        }
+        .feedback-popup.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        .feedback-popup.danger {
+            background-color: var(--danger-color);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Cyber Abyss Explorer</h1>
+        <p>Dive deep into the web's hidden dangers and learn to navigate safely.</p>
+        <p><small>Based on insights from PCWorld's "Most Dangerous Places on the Web".</small></p>
+    </header>
+
+    <nav class="sticky-nav">
+        <ul id="main-nav-links">
+            <li><a href="#zone-surface">Surface</a></li>
+            <li><a href="#zone-phishing">Phishing</a></li>
+            <li><a href="#zone-malware">Malware</a></li>
+            <li><a href="#zone-compromised">Compromised Sites</a></li>
+            <li><a href="#zone-darkweb">Dark Web</a></li>
+            <li><a href="#zone-social">Social Media</a></li>
+            <li><a href="#zone-wifi">Public Wi-Fi</a></li>
+            <li><a href="#zone-outdated">Outdated Software</a></li>
+            <li><a href="#zone-safe-harbor">Safe Harbor</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section id="zone-surface" class="zone">
+            <div class="container">
+                <h2>The Digital Surface: First Glance</h2>
+                <div class="zone-content">
+                    <div class="info-card">
+                        <h3>Welcome, Explorer!</h3>
+                        <p>The internet is vast and wonderful, but like any great ocean, it has its depths and dangers. This journey will guide you through common perils, equipping you with knowledge to stay safe.</p>
+                        <p>Each zone below represents a different category of online threat. Scroll to explore, interact with the exhibits, and learn how to protect yourself.</p>
+                    </div>
+                    <div class="info-card">
+                        <h3>General Safety Principles</h3>
+                        <ul>
+                            <li><strong>Be Skeptical:</strong> If it looks too good to be true, it probably is.</li>
+                            <li><strong>Verify Sources:</strong> Don't trust unsolicited communications blindly.</li>
+                            <li><strong>Use Strong, Unique Passwords:</strong> A password manager is your best friend.</li>
+                            <li><strong>Keep Software Updated:</strong> Patches often fix critical security holes.</li>
+                            <li><strong>Think Before You Click:</strong> Especially on links or attachments.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="zone-phishing" class="zone">
+            <div class="container">
+                <h2>The Phishing Depths: Lures and Deception</h2>
+                <div class="zone-content">
+                    <div class="info-card">
+                        <h3>What is Phishing?</h3>
+                        <p>Phishing is a fraudulent attempt to obtain sensitive information such as usernames, passwords, and credit card details by disguising as a trustworthy entity in an electronic communication.</p>
+                        <p>These attacks often create a sense of urgency or fear. The PCWorld article highlights phishing as a pervasive threat across email, social media, and messaging apps.</p>
+                        <h4>Common Tactics:</h4>
+                        <ul>
+                            <li>Urgent security alerts</li>
+                            <li>Fake invoices or delivery notifications</li>
+                            <li>Offers that are too good to be true</li>
+                            <li>Requests for personal information</li>
+                        </ul>
+                    </div>
+                    <div class="info-card interactive-exhibit">
+                        <h3>Interactive: Spot the Phish!</h3>
+                        <p>Examine the email below. Click on suspicious elements to reveal clues.</p>
+                        <div class="phishing-email-demo" id="phishing-email">
+                            <header>
+                                <p><strong>From:</strong> <span class="suspicious" data-clue="Unusual sender address, not an official domain.">noreply.alerts-support@yourbank-security-update.com</span></p>
+                                <p><strong>Subject:</strong> <span class="suspicious" data-clue="Generic greeting and urgent, fear-inducing language.">Urgent Security Alert: Unusual Login Attempt Detected!</span></p>
+                            </header>
+                            <p>Dear Valued Customer,</p>
+                            <p>We detected an unusual login attempt on your account from an unrecognized device. For your security, we have temporarily suspended your account.</p>
+                            <p>Please verify your account details immediately to restore access and prevent permanent suspension. Click the link below:</p>
+                            <p><a href="http://yourbank-security-update.com.malicious-site.biz/login" 
+                               data-real-url="yourbank.com/security" 
+                               class="suspicious suspicious-link phishing-button"
+                               data-clue="Link text looks official, but hover (or inspect) reveals a suspicious URL. It should go to the bank's real domain.">Verify Account Now</a></p>
+                            <p><span class="suspicious" data-clue="Poor grammar or spelling mistakes are common red flags.">Failure to verify within 24 hours will result in permanant account closure.</span></p>
+                            <p>Thank you,<br>YourBank Security Team</p>
+                        </div>
+                        <p id="phish-feedback" style="margin-top:10px; font-weight: bold;"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="zone-malware" class="zone">
+            <div class="container">
+                <h2>The Malware Caves: Hidden Infections</h2>
+                <div class="zone-content">
+                    <div class="info-card">
+                        <h3>Understanding Malware</h3>
+                        <p>Malware (malicious software) is designed to harm or exploit any programmable device, service or network. This includes viruses, worms, trojans, ransomware, spyware, and adware.</p>
+                        <p>It can be delivered via malicious attachments, infected downloads (especially from P2P networks or dodgy sites), or by exploiting software vulnerabilities.</p>
+                        <h4>Types:</h4>
+                        <ul>
+                            <li><strong>Ransomware:</strong> Encrypts your files, demands payment.</li>
+                            <li><strong>Spyware:</strong> Steals your information.</li>
+                            <li><strong>Trojans:</strong> Disguise as legitimate software.</li>
+                            <li><strong>Viruses/Worms:</strong> Self-replicate and spread.</li>
+                        </ul>
+                    </div>
+                    <div class="info-card interactive-exhibit">
+                        <h3>Malware Spread Visualizer (Conceptual)</h3>
+                        <div class="malware-visualizer">
+                            <div class="scan-line"></div>
+                            <p>Simulating infection vectors...</p>
+                            <!-- Canvas or SVG could be used here for actual animation -->
+                        </div>
+                        <h4>How to Protect:</h4>
+                        <ul>
+                            <li>Use reputable antivirus software and keep it updated.</li>
+                            <li>Scan downloads before opening.</li>
+                            <li>Avoid suspicious websites and P2P networks for software.</li>
+                            <li>Enable browser security features.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Add more zones based on PCWorld article: -->
+        <section id="zone-compromised" class="zone">
+            <div class="container"><h2>Compromised Sites & P2P Networks</h2> <!-- Content --> </div>
+        </section>
+        <section id="zone-darkweb" class="zone">
+            <div class="container"><h2>The Dark Web Depths</h2> <!-- Content, keep it informative not sensationalist --> </div>
+        </section>
+        <section id="zone-social" class="zone">
+            <div class="container"><h2>Social Media Shallows (Misinfo & Scams)</h2> <!-- Misinfo dissector elements here --> </div>
+        </section>
+        <section id="zone-wifi" class="zone">
+            <div class="container"><h2>Public Wi-Fi Mists</h2> <!-- Explain Man-in-the-Middle --> </div>
+        </section>
+        <section id="zone-outdated" class="zone">
+            <div class="container"><h2>Outdated Software Crevices</h2> <!-- Vulnerabilities --> </div>
+        </section>
+
+
+        <section id="zone-safe-harbor" class="zone">
+            <div class="container">
+                <h2>The Safe Harbor: Your Defense Strategy</h2>
+                <div class="zone-content">
+                    <div class="info-card">
+                        <h3>Key Takeaways & Defenses</h3>
+                        <p>Navigating the web safely is an ongoing practice. Here's a summary of key defenses:</p>
+                        <ul>
+                            <li><strong>Security Software:</strong> Antivirus, firewall, anti-malware.</li>
+                            <li><strong>Updates:</strong> Keep OS, browser, and all apps updated.</li>
+                            <li><strong>Passwords:</strong> Strong, unique, use a password manager. Enable 2FA/MFA.</li>
+                            <li><strong>Backups:</strong> Regularly back up important data.</li>
+                            <li><strong>Awareness:</strong> Be vigilant about phishing, scams, and suspicious links/downloads.
+                            </li>
+                            <li><strong>Secure Connections:</strong> Look for HTTPS. Be wary of public Wi-Fi for sensitive tasks; use a VPN.</li>
+                            <li><strong>Verify:</strong> Independently verify requests for information or urgent actions.</li>
+                        </ul>
+                    </div>
+                     <div class="info-card">
+                        <h3>Useful Resources</h3>
+                        <p>Further your knowledge and find tools:</p>
+                        <ul>
+                            <li><a href="https://www.cisa.gov/stopransomware" target="_blank" rel="noopener noreferrer">StopRansomware.gov (CISA)</a></li>
+                            <li><a href="https://consumer.ftc.gov/identity-theft-and-online-security" target="_blank" rel="noopener noreferrer">FTC Online Security</a></li>
+                            <li><a href="https://haveibeenpwned.com/" target="_blank" rel="noopener noreferrer">Have I Been Pwned?</a> (Check for data breaches)</li>
+                            <li><em>(Add more relevant links)</em></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>© <span id="currentYear"></span> Cyber Abyss Explorer. An educational resource.</p>
+            <p>Content inspired by <a href="https://www.pcworld.com/article/503407/most-dangerous-places-on-the-web.html" target="_blank" rel="noopener noreferrer">PCWorld: Most Dangerous Places on the Web</a>.</p>
+            <p>This is a fictional, educative demonstration.</p>
+        </div>
+    </footer>
+
+    <div class="feedback-popup" id="feedback-popup">This is a clue!</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Sticky Nav Active State & Smooth Scroll ---
+            const navLinks = document.querySelectorAll('.sticky-nav a');
+            const sections = document.querySelectorAll('main .zone');
+            const feedbackPopup = document.getElementById('feedback-popup');
+            let clickTimeout; // To manage popup display time
+
+            // Smooth scroll for nav links
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    if (targetSection) {
+                        // Smooth scroll:
+                        // window.scrollTo({ top: targetSection.offsetTop - nav.offsetHeight, behavior: 'smooth' });
+                        // Or, simpler jump (can be jerky but reliable):
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                });
+            });
+            
+            // Intersection Observer for section visibility and nav update
+            const observerOptions = {
+                root: null, // viewport
+                rootMargin: '0px',
+                threshold: 0.4 // 40% of section visible
+            };
+
+            const sectionObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        
+                        // Update active nav link
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${entry.target.id}`) {
+                                link.classList.add('active');
+                            }
+                        });
+                        // Play a subtle sound if Web Audio API is used for zone entry
+                        // playZoneEntrySound(entry.target.id);
+                    } else {
+                        // Optional: remove is-visible if you want animations to replay on scroll up
+                        // entry.target.classList.remove('is-visible');
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                sectionObserver.observe(section);
+            });
+
+
+            // --- Phishing Email Interaction ---
+            const phishingElements = document.querySelectorAll('#phishing-email .suspicious');
+            const phishFeedback = document.getElementById('phish-feedback');
+            let identifiedClues = 0;
+            const totalClues = phishingElements.length;
+
+            phishingElements.forEach(el => {
+                el.addEventListener('click', () => {
+                    const clue = el.getAttribute('data-clue');
+                    if (clue) {
+                        showFeedback(clue, 'danger');
+                        if (!el.classList.contains('clicked')) {
+                            el.classList.add('clicked');
+                            el.style.outline = '2px solid var(--danger-color)';
+                            identifiedClues++;
+                        }
+                        phishFeedback.textContent = `Clues found: ${identifiedClues}/${totalClues}. ${clue}`;
+                        if (identifiedClues === totalClues) {
+                           phishFeedback.textContent += " Great job! You've spotted all the major red flags.";
+                           phishFeedback.style.color = 'var(--safe-color)';
+                        } else {
+                           phishFeedback.style.color = 'var(--danger-color)';
+                        }
+                        playInteractionSound('warning');
+                    }
+                });
+                 // For links, prevent default navigation only if it's part of the demo
+                if (el.tagName === 'A' && el.classList.contains('suspicious-link')) {
+                    el.addEventListener('click', (e) => e.preventDefault());
+                }
+            });
+
+            // --- Feedback Popup Function ---
+            function showFeedback(message, type = 'info') { // type can be 'info', 'success', 'danger'
+                if (clickTimeout) clearTimeout(clickTimeout);
+                feedbackPopup.textContent = message;
+                feedbackPopup.className = 'feedback-popup'; // Reset classes
+                feedbackPopup.classList.add('show');
+                if (type === 'danger') feedbackPopup.classList.add('danger');
+                else if (type === 'success') feedbackPopup.style.backgroundColor = 'var(--safe-color)'; // temp
+                else feedbackPopup.style.backgroundColor = 'var(--accent-color-secondary)'; // temp for info
+
+                clickTimeout = setTimeout(() => {
+                    feedbackPopup.classList.remove('show');
+                }, 3000);
+            }
+
+            // --- Web Audio API for Basic Sounds (Conceptual) ---
+            let audioCtx;
+            const soundEffects = {
+                hover: null,
+                click: null,
+                warning: null,
+                zoneEntry: {} // To store sounds for different zones
+            };
+
+            function initAudio() {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    // Create simple oscillator sounds as placeholders
+                    soundEffects.click = createOscillatorSound(200, 'sine', 0.1); // Simple click
+                    soundEffects.warning = createOscillatorSound(300, 'sawtooth', 0.15, 0.2); // Warning
+                    // Add more sounds
+                } catch (e) {
+                    console.warn('Web Audio API is not supported in this browser.');
+                }
+            }
+
+            function createOscillatorSound(frequency, type, duration = 0.1, gainValue = 0.05) {
+                return () => {
+                    if (!audioCtx) return;
+                    const oscillator = audioCtx.createOscillator();
+                    const gainNode = audioCtx.createGain();
+
+                    oscillator.type = type;
+                    oscillator.frequency.setValueAtTime(frequency, audioCtx.currentTime);
+                    gainNode.gain.setValueAtTime(gainValue, audioCtx.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioCtx.destination);
+                    oscillator.start();
+                    oscillator.stop(audioCtx.currentTime + duration);
+                };
+            }
+            
+            function playInteractionSound(soundName) {
+                if (audioCtx && soundEffects[soundName]) {
+                    soundEffects[soundName]();
+                }
+            }
+            
+            // Initialize audio on first user interaction (common practice for browsers)
+            // document.body.addEventListener('click', initAudio, { once: true });
+            // For demo, let's init it right away if possible.
+            initAudio();
+
+
+            // --- Footer Current Year ---
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+            // --- Example: Add hover sounds to nav links ---
+            navLinks.forEach(link => {
+                link.addEventListener('mouseenter', () => {
+                    // playInteractionSound('hover'); // if hover sound is defined
+                });
+            });
+        });
+    </script>
+</body>
+</html>
