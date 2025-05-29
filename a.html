@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Danger Navigator - Interactive Cybersecurity Education</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --danger-red: #ff3b30;
+            --warning-orange: #ff9f0a;
+            --caution-yellow: #ffcc02;
+            --safe-green: #30d158;
+            --bg-dark: #0a0a0f;
+            --bg-mid: #1a1a2e;
+            --bg-light: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-cyber: #00d4ff;
+            --accent-neon: #39ff14;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-mid) 50%, var(--bg-light) 100%);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .hero-content {
+            text-align: center;
+            z-index: 2;
+            max-width: 800px;
+            padding: 2rem;
+        }
+
+        .hero-title {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-cyber), var(--accent-neon));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.3)); }
+            to { filter: drop-shadow(0 0 40px rgba(57, 255, 20, 0.4)); }
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .start-button {
+            background: linear-gradient(135deg, var(--accent-cyber), var(--accent-neon));
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            color: var(--bg-dark);
+        }
+
+        .start-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .start-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .start-button:hover::before {
+            left: 100%;
+        }
+
+        .main-content {
+            min-height: 100vh;
+            padding: 2rem;
+            display: none;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--danger-red), var(--warning-orange), var(--caution-yellow), var(--safe-green));
+            z-index: 1000;
+            transition: width 0.3s ease;
+        }
+
+        .threat-level-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .threat-level-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .threat-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 0;
+        }
+
+        .threat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .threat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .threat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 0%, rgba(0, 212, 255, 0.1) 50%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .threat-card:hover::before {
+            opacity: 1;
+        }
+
+        .threat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .threat-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .threat-level {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .level-green { background: var(--safe-green); color: white; }
+        .level-yellow { background: var(--caution-yellow); color: black; }
+        .level-orange { background: var(--warning-orange); color: white; }
+        .level-red { background: var(--danger-red); color: white; }
+
+        .threat-location {
+            color: var(--accent-cyber);
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .threat-description {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .safety-tips {
+            background: rgba(57, 255, 20, 0.1);
+            border-left: 4px solid var(--accent-neon);
+            padding: 1rem;
+            border-radius: 0 10px 10px 0;
+            margin-top: 1rem;
+        }
+
+        .safety-tips h4 {
+            color: var(--accent-neon);
+            margin-bottom: 0.5rem;
+        }
+
+        .interactive-demo {
+            margin: 1rem 0;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .demo-button {
+            background: var(--accent-cyber);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .demo-button:hover {
+            background: var(--accent-neon);
+            color: black;
+            transform: scale(1.05);
+        }
+
+        .quiz-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .quiz-question {
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--accent-cyber);
+        }
+
+        .quiz-option.correct {
+            background: rgba(57, 255, 20, 0.2);
+            border-color: var(--accent-neon);
+        }
+
+        .quiz-option.incorrect {
+            background: rgba(255, 59, 48, 0.2);
+            border-color: var(--danger-red);
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent-cyber);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        .score-display {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .nav-button {
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--accent-cyber);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-button:hover:not(:disabled) {
+            background: var(--accent-cyber);
+            color: var(--bg-dark);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .threat-card {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .threat-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="hero-section" id="heroSection">
+        <div class="cyber-grid"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">WEB DANGER NAVIGATOR</h1>
+            <p class="hero-subtitle">Navigate through the 15 most dangerous places on the internet. Learn, survive, and become a cybersecurity expert.</p>
+            <button class="start-button" onclick="startJourney()">
+                BEGIN CYBER JOURNEY
+            </button>
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="threat-level-indicator" id="threatIndicator">
+            <div class="threat-level-dot" id="threatDot"></div>
+            <span id="threatText">Safe Zone</span>
+        </div>
+        <div class="score-display" id="scoreDisplay">
+            <div>Security Score: <span id="score">0</span>/100</div>
+            <div>Threats Survived: <span id="threatsCompleted">0</span>/15</div>
+        </div>
+
+        <div class="threat-container" id="threatContainer">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+
+        <div class="navigation">
+            <button class="nav-button" id="prevButton" onclick="previousThreat()" disabled>Previous</button>
+            <button class="nav-button" id="nextButton" onclick="nextThreat()">Next Threat</button>
+            <button class="nav-button" id="restartButton" onclick="restartJourney()" style="display: none;">Restart Journey</button>
+        </div>
+    </div>
+
+    <script>
+        // Threat data based on the PCWorld article
+        const threats = [
+            {
+                id: 1,
+                title: "Misinformation",
+                location: "Social Media",
+                level: "green",
+                levelText: "Low Risk",
+                description: "Social media algorithms curate content that can push misinformation in stories and images that seem believable. Once you click through, you become susceptible to further misinformation that reinforces false narratives.",
+                safetyTips: "Actively analyze all stories, images, and links. If content seems designed to provoke emotion, pause and reconsider. Double-check stories with trusted third-party sources.",
+                demoType: "misinformation",
+                quiz: {
+                    question: "What's the best way to verify a suspicious social media post?",
+                    options: [
+                        "Share it immediately to get others' opinions",
+                        "Check it against trusted third-party sources",
+                        "Assume it's true if it has many likes",
+                        "Only trust posts from verified accounts"
+                    ],
+                    correct: 1
+                }
+            },
+            {
+                id: 2,
+                title: "Deepfakes and AI Scams",
+                location: "Everywhere",
+                level: "yellow",
+                levelText: "Medium Risk",
+                description: "Deepfakes are videos or audio digitally altered to appear as someone else. They can damage reputations, spread misinformation, or be used in AI scams to steal personal information.",
+                safetyTips: "Develop healthy skepticism toward everything online. Always question videos or audio that seem alarming or sensational. Remember that bad actors are trying to prey on you.",
+                demoType: "deepfake",
+                quiz: {
+                    question: "How can you spot a potential deepfake video?",
+                    options: [
+                        "Check if the person blinks naturally",
+                        "Look for inconsistent lighting or shadows",
+                        "Listen for unnatural speech patterns",
+                        "All of the above"
+                    ],
+                    correct: 3
+                }
+            },
+            {
+                id: 3,
+                title: "Lookalike URLs",
+                location: "Browser Address Bar",
+                level: "red",
+                levelText: "High Risk",
+                description: "Phishing scams use lookalike URLs that imitate legitimate websites. Typos like 'goggle.com' instead of 'google.com' can lead to fake sites designed to steal your login credentials.",
+                safetyTips: "Double-check every URL you type. Hover over links to preview the URL before clicking. When in doubt, type the URL manually rather than clicking links.",
+                demoType: "url",
+                quiz: {
+                    question: "Which of these URLs is potentially dangerous?",
+                    options: [
+                        "https://www.google.com",
+                        "https://www.g00gle.com",
+                        "https://google.com",
+                        "https://mail.google.com"
+                    ],
+                    correct: 1
+                }
+            },
+            {
+                id: 4,
+                title: "QR Code Scams",
+                location: "Real World",
+                level: "orange",
+                levelText: "Moderate Risk",
+                description: "Scammers place fake QR codes over legitimate ones on parking meters, restaurant menus, and public Wi-Fi access points. These codes redirect you to imposter sites that steal your information.",
+                safetyTips: "Check that QR codes aren't stickers placed over originals. Verify you've arrived at a legitimate website after scanning. If something seems off, close the tab immediately.",
+                demoType: "qr",
+                quiz: {
+                    question: "What should you do before scanning a QR code in public?",
+                    options: [
+                        "Scan it quickly before anyone notices",
+                        "Check if it's a sticker placed over the original",
+                        "Assume all QR codes are safe",
+                        "Only scan codes that look professionally printed"
+                    ],
+                    correct: 1
+                }
+            },
+            {
+                id: 5,
+                title: "Malvertising",
+                location: "Streaming Sites",
+                level: "yellow",
+                levelText: "Medium Risk",
+                description: "Illegal streaming sites fund themselves through ads, but they're less scrupulous about which ads they accept. These ads can contain malware that infects your device.",
+                safetyTips: "Never click on ads on sketchy streaming sites. Keep your antivirus software updated. Consider using a VPN when visiting such sites.",
+                demoType: "malware",
+                quiz: {
+                    question: "What is 'malvertising'?",
+                    options: [
+                        "Advertising on social media",
+                        "Ads that contain malware",
+                        "False advertising claims",
+                        "Advertising without permission"
+                    ],
+                    correct: 1
+                }
+            }
+            // Additional threats would continue here...
+        ];
+
+        let currentThreatIndex = 0;
+        let userScore = 0;
+        let threatsCompleted = 0;
+
+        function startJourney() {
+            document.getElementById('heroSection').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            createParticles();
+            loadThreat(0);
+        }
+
+        function createParticles() {
+            const particleContainer = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                particleContainer.appendChild(particle);
+            }
+        }
+
+        function loadThreat(index) {
+            if (index >= threats.length) {
+                showCompletion();
+                return;
+            }
+
+            const threat = threats[index];
+            const container = document.getElementById('threatContainer');
+            
+            container.innerHTML = `
+                <div class="threat-card">
+                    <div class="threat-header">
+                        <h2 class="threat-title">Threat ${threat.id}: ${threat.title}</h2>
+                        <div class="threat-level level-${threat.level}">${threat.levelText}</div>
+                    </div>
+                    <div class="threat-location">📍 Location: ${threat.location}</div>
+                    <div class="threat-description">${threat.description}</div>
+                    
+                    <div class="interactive-demo">
+                        <h4>🔍 Interactive Demo</h4>
+                        <div id="demoArea-${threat.id}">
+                            ${generateDemo(threat)}
+                        </div>
+                    </div>
+
+                    <div class="safety-tips">
+                        <h4>🛡️ How to Stay Safe</h4>
+                        <p>${threat.safetyTips}</p>
+                    </div>
+
+                    <div class="quiz-section">
+                        <h4>🧠 Knowledge Check</h4>
+                        <div class="quiz-question">${threat.quiz.question}</div>
+                        <div class="quiz-options" id="quiz-${threat.id}">
+                            ${threat.quiz.options.map((option, i) => 
+                                `<div class="quiz-option" onclick="selectAnswer(${i}, ${threat.quiz.correct}, ${threat.id})">${option}</div>`
+                            ).join('')}
+                        </div>
+                        <div id="quiz-result-${threat.id}"></div>
+                    </div>
+                </div>
+            `;
+
+            updateProgress();
+            updateThreatIndicator(threat);
+            updateNavigation();
+        }
+
+        function generateDemo(threat) {
+            switch (threat.demoType) {
+                case 'url':
+                    return `
+                        <p>Click on the suspicious URL to see what happens:</p>
+                        <button class="demo-button" onclick="showUrlDemo()">g00gle.com</button>
+                        <div id="url-demo-result"></div>
+                    `;
+                case 'misinformation':
+                    return `
+                        <p>Identify the red flags in this fake news headline:</p>
+                        <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; margin: 1rem 0;">
+                            "SHOCKING: Local Man Discovers ONE WEIRD TRICK That Doctors HATE!"
+                        </div>
+                        <button class="demo-button" onclick="showMisinfoDemo()">Analyze Red Flags</button>
+                        <div id="misinfo-demo-result"></div>
+                    `;
+                case 'qr':
+                    return `
+                        <p>Examine this QR code - what looks suspicious?</p>
+                        <div style="background: white; width: 100px; height: 100px; margin: 1rem auto; border: 2px dashed red; display: flex; align-items: center; justify-content: center; color: black;">
+                            📱 QR CODE<br>(Sticker Edge Visible)
+                        </div>
+                        <button class="demo-button" onclick="showQRDemo()">Identify Issue</button>
+                        <div id="qr-demo-result"></div>
+                    `;
+                default:
+                    return `
+                        <p>Interactive demo for ${threat.title} threat simulation.</p>
+                        <button class="demo-button" onclick="showGenericDemo('${threat.title}')">Simulate Threat</button>
+                        <div id="generic-demo-result"></div>
+                    `;
+            }
+        }
+
+        function showUrlDemo() {
+            document.getElementById('url-demo-result').innerHTML = `
+                <div style="background: rgba(255, 59, 48, 0.2); border: 1px solid var(--danger-red); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    ⚠️ DANGER DETECTED! This URL uses '00' instead of 'oo' - a common phishing technique.
+                </div>
+            `;
+        }
+
+        function showMisinfoDemo() {
+            document.getElementById('misinfo-demo-result').innerHTML = `
+                <div style="background: rgba(57, 255, 20, 0.2); border: 1px solid var(--accent-neon); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    🎯 Red Flags Identified:<br>
+                    • Sensational language ("SHOCKING", "ONE WEIRD TRICK")<br>
+                    • Appeals to emotion rather than facts<br>
+                    • Vague claims without specific information<br>
+                    • Clickbait headline structure
+                </div>
+            `;
+        }
+
+        function showQRDemo() {
+            document.getElementById('qr-demo-result').innerHTML = `
+                <div style="background: rgba(255, 149, 10, 0.2); border: 1px solid var(--warning-orange); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    🚨 SUSPICIOUS: This QR code appears to be a sticker placed over the original. Never scan QR codes that look like stickers!
+                </div>
+            `;
+        }
+
+        function showGenericDemo(threatTitle) {
+            document.getElementById('generic-demo-result').innerHTML = `
+                <div style="background: rgba(0, 212, 255, 0.2); border: 1px solid var(--accent-cyber); padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    💡 Simulation complete! You've experienced a safe version of the ${threatTitle} threat. Remember the safety tips to stay protected!
+                </div>
+            `;
+        }
+
+        function selectAnswer(selected, correct, threatId) {
+            const options = document.querySelectorAll(`#quiz-${threatId} .quiz-option`);
+            const result = document.getElementById(`quiz-result-${threatId}`);
+            
+            options.forEach((option, index) => {
+                option.style.pointerEvents = 'none';
+                if (index === correct) {
+                    option.classList.add('correct');
+                } else if (index === selected && index !== correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            if (selected === correct) {
+                userScore += 10;
+                result.inner
